@@ -81,6 +81,11 @@
     "global": {}
   },
   "api": {
+    "baseUrl": "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app",
+    "specFiles": [
+      "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/openapi.json",
+      "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/swagger/v1/swagger.json"
+    ],
     "playground": {
       "mode": "show"
     },
