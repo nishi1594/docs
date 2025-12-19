@@ -1,0 +1,179 @@
+---
+title: 'Evaluate Batch'
+description: 'Evaluate multiple criminal records in batch'
+---
+
+# Evaluate Batch Endpoint
+
+Process multiple criminal records efficiently in a single request. Records are processed concurrently up to the specified limit.
+
+<Endpoint method="POST" url="/evaluate-batch" />
+
+## Authentication
+
+<ParamField body="header" name="Authorization" type="string" required>
+  Bearer token: `Bearer YOUR_JWT_TOKEN`
+</ParamField>
+
+## Request Body
+
+<ParamField body="body" name="engines" type="array" required>
+  List of evaluation engines to call. Available values: `"CE"`, `"SLM"`, `"T5"`. <br />
+  **Example:** `["SLM", "CE", "T5"]`
+</ParamField>
+
+<ParamField body="body" name="records" type="array" required>
+  Array of criminal record objects. Each record follows the [CriminalRecord Schema](/api-reference/schemas/criminal-record). <br />
+  **Minimum:** 1 record, **Maximum:** 100 records per batch
+</ParamField>
+
+<ParamField body="body" name="response_format" type="string">
+  Response format: `"short"` or `"detailed"`. Defaults based on number of engines. <br />
+  **Example:** `"short"`
+</ParamField>
+
+<ParamField body="body" name="max_concurrent" type="integer">
+  Maximum number of records to process concurrently. Default: 5, Maximum: 20. <br />
+  **Example:** `5`
+</ParamField>
+
+## Request Example
+
+```bash
+curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate-batch" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "engines": ["SLM", "CE", "T5"],
+    "records": [
+      {
+        "xml": "<ScreeningResults>...</ScreeningResults>",
+        "search_id": "search-1",
+        "search_date": "2024-01-15",
+        "applicant_state": "CA",
+        "candidate_info": {
+          "first_name": "John",
+          "last_name": "Doe"
+        }
+      },
+      {
+        "xml": "<ScreeningResults>...</ScreeningResults>",
+        "search_id": "search-2",
+        "search_date": "2024-01-15",
+        "applicant_state": "NY"
+      }
+    ],
+    "response_format": "short",
+    "max_concurrent": 5
+  }'
+```
+
+## Response
+
+<ResponseField name="total_records" type="integer">
+  Total number of records processed
+</ResponseField>
+
+<ResponseField name="success_count" type="integer">
+  Number of successfully processed records
+</ResponseField>
+
+<ResponseField name="error_count" type="integer">
+  Number of failed records
+</ResponseField>
+
+<ResponseField name="results" type="array">
+  Array of evaluation results. Each result contains either:
+  - `status: "success"` with `output` containing the evaluation response
+  - `status: "error"` with `error` containing the error message
+</ResponseField>
+
+### Success Response (200)
+
+```json
+{
+  "total_records": 2,
+  "success_count": 2,
+  "error_count": 0,
+  "results": [
+    {
+      "search_id": "search-1",
+      "status": "success",
+      "output": {
+        "search_id": "search-1",
+        "correlation_id": "uuid-456",
+        "status": "success",
+        "engines_called": ["SLM", "CE", "T5"],
+        "individual_decisions": {...},
+        "data": {...},
+        "timing": {...}
+      },
+      "error": null
+    },
+    {
+      "search_id": "search-2",
+      "status": "success",
+      "output": {
+        "search_id": "search-2",
+        "correlation_id": "uuid-789",
+        "status": "success",
+        ...
+      },
+      "error": null
+    }
+  ]
+}
+```
+
+### Partial Success Response (200)
+
+When some records fail:
+
+```json
+{
+  "total_records": 3,
+  "success_count": 2,
+  "error_count": 1,
+  "results": [
+    {
+      "search_id": "search-1",
+      "status": "success",
+      "output": {...},
+      "error": null
+    },
+    {
+      "search_id": "search-2",
+      "status": "error",
+      "output": null,
+      "error": "Missing required field: search_date"
+    },
+    {
+      "search_id": "search-3",
+      "status": "success",
+      "output": {...},
+      "error": null
+    }
+  ]
+}
+```
+
+## Status Codes
+
+- `200` - Batch processing completed (may include individual failures)
+- `401` - Authentication required or token expired
+- `422` - Validation error in request structure
+- `500` - Server error
+
+## Best Practices
+
+1. **Batch Size**: Keep batches to 50-100 records for optimal performance
+2. **Concurrency**: Use `max_concurrent: 5-10` for balanced throughput
+3. **Error Handling**: Check `error_count` and inspect individual `results` for failures
+4. **Retry Logic**: Retry failed records individually rather than re-submitting entire batch
+
+## Related Documentation
+
+- [Evaluate Endpoint](/api-reference/endpoints/evaluate) - Single record evaluation
+- [CriminalRecord Schema](/api-reference/schemas/criminal-record) - Record structure
+- [Authentication](/authentication) - How to get JWT tokens
+

@@ -1,0 +1,59 @@
+---
+title: Public Records API Documentation
+---
+
+# Welcome to Public Records API Documentation
+
+The Public Records API is an AI-powered service that provides criminal record evaluation through multiple decision engines. The API orchestrates processing through XML transformation, compliance rule evaluation, and machine learning models to deliver comprehensive criminal record assessments.
+
+## API Organization
+
+This documentation is organized into the following sections to help you integrate with the Public Records API:
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/authentication">
+    Learn how to authenticate and secure your API requests with JWT tokens
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference">
+    Complete endpoint documentation with request and response schemas
+  </Card>
+  <Card title="Examples" icon="book" href="/examples">
+    Code examples in Python, JavaScript, and cURL for common use cases
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/authentication">
+    Get up and running quickly with step-by-step authentication guide
+  </Card>
+</CardGroup>
+
+## Architecture
+
+The Public Records API orchestrates a multi-step workflow:
+
+1. **XML-Transformer** - Transforms raw XML criminal records into structured JSON (sequential)
+2. **Compliance-Engine** - Evaluates records against compliance rules (parallel)
+3. **SLM Engine** - Evaluates records through Structured Language Model evaluation (parallel)
+4. **T5 Model API** - Provides additional ML-based evaluation capabilities (parallel)
+
+## Base URL
+
+```
+https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app
+```
+
+## Interactive API Documentation
+
+Visit our interactive Swagger UI documentation:
+
+**https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/docs**
+
+## Need Help?
+
+<CardGroup cols={2}>
+  <Card title="Support" icon="headset" href="mailto:support@theary.ai">
+    Contact our support team
+  </Card>
+  <Card title="API Status" icon="globe" href="https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/health">
+    Check API health status
+  </Card>
+</CardGroup>
+

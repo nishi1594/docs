@@ -1,0 +1,84 @@
+---
+title: 'Health Check'
+description: 'Check API and service health status'
+---
+
+# Health Check Endpoint
+
+Check the health status of the Public Records API and all dependent services.
+
+<Endpoint method="GET" url="/health" />
+
+## Authentication
+
+No authentication required.
+
+## Request
+
+No request body or parameters required.
+
+## Response
+
+<ResponseField name="status" type="string">
+  Overall API status: `"healthy"` or `"unhealthy"`
+</ResponseField>
+
+<ResponseField name="service" type="string">
+  Service name: `"eval-framework"`
+</ResponseField>
+
+<ResponseField name="services" type="object">
+  Health status of dependent services:
+  - `xml_transformer`: XML transformation service
+  - `compliance_engine`: Compliance evaluation service
+  - `slm_engine`: SLM evaluation service
+  - `t5_engine`: T5 model API service
+</ResponseField>
+
+### Example Response
+
+```json
+{
+  "status": "healthy",
+  "service": "eval-framework",
+  "services": {
+    "xml_transformer": true,
+    "compliance_engine": true,
+    "slm_engine": true,
+    "t5_engine": true
+  }
+}
+```
+
+### Unhealthy Response
+
+```json
+{
+  "status": "unhealthy",
+  "service": "eval-framework",
+  "services": {
+    "xml_transformer": true,
+    "compliance_engine": false,
+    "slm_engine": true,
+    "t5_engine": true
+  }
+}
+```
+
+## Status Codes
+
+- `200` - Health check completed (may indicate healthy or unhealthy status)
+- `503` - Service unavailable
+
+## Usage
+
+Monitor API health for:
+- Service availability checks
+- Load balancer health checks
+- Monitoring and alerting systems
+- CI/CD pipeline health checks
+
+## Related Documentation
+
+- [API Overview](/api-reference/overview) - Complete API documentation
+

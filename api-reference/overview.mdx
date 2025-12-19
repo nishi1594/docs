@@ -1,0 +1,135 @@
+---
+title: 'Public Records API Overview'
+description: 'AI-powered criminal record evaluation service'
+---
+
+# Public Records API Overview
+
+The Public Records API orchestrates criminal record evaluation through multiple AI-powered decision engines, providing comprehensive compliance assessments and risk analysis.
+
+## Base URL
+
+<CodeGroup>```https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app ```</CodeGroup>
+
+## Quick Start Example
+
+Evaluate your first criminal record:
+
+```bash
+curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "engines": ["SLM", "CE", "T5"],
+    "record": {
+      "xml": "<ScreeningResults>...</ScreeningResults>",
+      "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+      "search_date": "2024-01-15",
+      "applicant_state": "CA",
+      "candidate_info": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1990-05-15"
+      }
+    },
+    "response_format": "short"
+  }'
+```
+
+## Core Endpoints
+
+| Category      | Description                               | Example Endpoint                                  |
+| ------------- | ----------------------------------------- | ------------------------------------------------- |
+| Health        | Service health and status checks          | `GET /health`                                     |
+| Authentication| Exchange API key for JWT token            | `POST /auth/token`                                |
+| Evaluate      | Evaluate a single criminal record         | `POST /evaluate`                                  |
+| Batch Evaluate| Process multiple records in batch         | `POST /evaluate-batch`                            |
+
+## Evaluation Engines
+
+The API supports multiple evaluation engines that can be used individually or in combination:
+
+- **CE (Compliance Engine)** - Rule-based compliance evaluation against regulatory requirements
+- **SLM (Structured Language Model)** - ML-powered decision tree evaluation
+- **T5 Model API** - Transformer-based evaluation for additional insights
+
+## Authentication
+
+All endpoints (except `/health` and `/auth/token`) require JWT Bearer token authentication:
+
+```http
+Authorization: Bearer YOUR_JWT_TOKEN
+```
+
+Learn more about [authentication](/authentication).
+
+## Response Formats
+
+The API supports two response formats:
+
+- **short** - Comparison format showing decisions from multiple engines side-by-side
+- **detailed** - Full engine responses with complete evaluation details
+
+## Getting Started
+
+### 1. Authentication
+
+Obtain your API key from your account manager and exchange it for a JWT token:
+
+```bash
+POST /auth/token
+```
+
+See [Authentication](/authentication) for full documentation.
+
+### 2. Evaluate a Record
+
+Submit a criminal record for evaluation:
+
+```bash
+POST /evaluate
+```
+
+See [Evaluate Endpoint](/api-reference/endpoints/evaluate) for full documentation.
+
+### 3. Batch Processing
+
+Process multiple records efficiently:
+
+```bash
+POST /evaluate-batch
+```
+
+See [Batch Evaluate Endpoint](/api-reference/endpoints/evaluate-batch) for details.
+
+## Error Handling
+
+The API uses standard HTTP status codes:
+
+- `200` - Success
+- `206` - Partial success (some engines failed)
+- `400` - Bad Request
+- `401` - Unauthorized
+- `422` - Validation Error
+- `500` - Server Error
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Evaluate Your First Record" icon="plus" href="/api-reference/endpoints/evaluate">
+    Submit a criminal record for evaluation
+  </Card>
+
+  <Card title="Authentication Guide" icon="key" href="/authentication">
+    Learn how to authenticate API requests
+  </Card>
+
+  <Card title="Schemas" icon="book" href="/api-reference/schemas/criminal-record">
+    Understand request and response schemas
+  </Card>
+
+  <Card title="Code Examples" icon="code" href="/examples">
+    See working code examples
+  </Card>
+</CardGroup>
+

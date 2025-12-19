@@ -1,0 +1,111 @@
+---
+title: 'CandidateInfo'
+description: 'Candidate information schema for identity matching and compliance evaluation'
+---
+
+# CandidateInfo Schema
+
+The CandidateInfo object contains personal information about the candidate being evaluated. This information is used for identity matching against criminal records and for compliance rule evaluation.
+
+## Optional Fields
+
+All fields are optional, but providing more information improves accuracy of identity matching and compliance evaluation.
+
+<ParamField name="first_name" type="string">
+  Candidate's first name **Example:** `"John"`
+</ParamField>
+
+<ParamField name="middle_name" type="string">
+  Candidate's middle name or initial **Example:** `"A"` or `"Michael"`
+</ParamField>
+
+<ParamField name="last_name" type="string">
+  Candidate's last name **Example:** `"Doe"`
+</ParamField>
+
+<ParamField name="date_of_birth" type="string">
+  Date of birth in YYYY-MM-DD format. Used for identity matching and age-based compliance rules. <br />
+  **Example:** `"1990-05-15"`
+</ParamField>
+
+<ParamField name="ssn" type="string">
+  Social Security Number in XXX-XX-XXXX format. Used for identity matching. <br />
+  **Example:** `"123-45-6789"`
+</ParamField>
+
+<ParamField name="address" type="string">
+  Full address including street, city, state, and zip code. Used for address-based matching and compliance rules. <br />
+  **Example:** `"123 Main St, Los Angeles, CA 90001"`
+</ParamField>
+
+<ParamField name="annual_salary" type="number">
+  Annual salary in USD. Used for salary-based compliance rules and position level evaluation. <br />
+  **Example:** `75000.0`
+</ParamField>
+
+## Complete Example
+
+```json
+{
+  "first_name": "John",
+  "middle_name": "A",
+  "last_name": "Doe",
+  "date_of_birth": "1990-05-15",
+  "ssn": "123-45-6789",
+  "address": "123 Main St, Los Angeles, CA 90001",
+  "annual_salary": 75000.0
+}
+```
+
+## Usage in Evaluation Request
+
+CandidateInfo is included in the `record` object when submitting an evaluation:
+
+```json
+{
+  "engines": ["SLM", "CE", "T5"],
+  "record": {
+    "xml": "<ScreeningResults>...</ScreeningResults>",
+    "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+    "search_date": "2024-01-15",
+    "applicant_state": "CA",
+    "candidate_info": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "date_of_birth": "1990-05-15",
+      "ssn": "123-45-6789",
+      "address": "123 Main St, Los Angeles, CA 90001"
+    }
+  }
+}
+```
+
+## Identity Matching
+
+When candidate_info is provided, the API performs identity matching to ensure the criminal records match the candidate being evaluated. Matching is performed on:
+
+- **Name**: First, middle, and last name fuzzy matching
+- **Date of Birth**: Exact or near-match comparison
+- **SSN**: Exact match when available
+- **Address**: Address history matching
+
+## Compliance Evaluation
+
+Candidate information is used for compliance rule evaluation:
+
+- **Age-based rules**: Date of birth determines age at time of offense
+- **Salary-based rules**: Annual salary determines position level and applicable rules
+- **State-specific rules**: Address and applicant_state determine state-specific compliance requirements
+
+## Validation Rules
+
+- **Date Format**: date_of_birth must be in YYYY-MM-DD format
+- **SSN Format**: If provided, ssn must follow XXX-XX-XXXX pattern
+- **Salary**: annual_salary must be a positive number if provided
+
+## Related Documentation
+
+- [CriminalRecord Schema](/api-reference/schemas/criminal-record) - Complete record structure
+- [Evaluate Endpoint](/api-reference/endpoints/evaluate) - How to submit evaluations
+- [Identity Matching](/guides/identity-matching) - Understanding identity matching
+

@@ -1,0 +1,345 @@
+---
+title: Code Examples
+---
+
+# Code Examples
+
+Complete code examples for integrating with the Public Records API in various programming languages.
+
+## Python
+
+### Basic Authentication and Evaluation
+
+```python
+import requests
+
+# Configuration
+API_KEY = "eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28"
+BASE_URL = "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app"
+
+# Step 1: Get JWT token
+def get_token():
+    response = requests.post(
+        f"{BASE_URL}/auth/token",
+        headers={"X-API-Key": API_KEY}
+    )
+    response.raise_for_status()
+    return response.json()["access_token"]
+
+# Step 2: Evaluate a record
+def evaluate_record(token, record_data):
+    response = requests.post(
+        f"{BASE_URL}/evaluate",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "engines": ["SLM", "CE", "T5"],
+            "record": record_data,
+            "response_format": "short"
+        }
+    )
+    response.raise_for_status()
+    return response.json()
+
+# Usage
+token = get_token()
+result = evaluate_record(token, {
+    "xml": "<ScreeningResults>...</ScreeningResults>",
+    "search_id": "test-123",
+    "search_date": "2024-01-15",
+    "applicant_state": "CA",
+    "candidate_info": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1990-05-15"
+    }
+})
+print(result)
+```
+
+### Token Caching with Auto-Refresh
+
+```python
+import requests
+import time
+from typing import Optional
+
+class PublicRecordsAPIClient:
+    def __init__(self, api_key: str, base_url: str):
+        self.api_key = api_key
+        self.base_url = base_url
+        self.token: Optional[str] = None
+        self.token_expires_at: float = 0
+    
+    def get_token(self) -> str:
+        """Get token, refreshing if expired."""
+        if self.token and time.time() < self.token_expires_at:
+            return self.token
+        
+        response = requests.post(
+            f"{self.base_url}/auth/token",
+            headers={"X-API-Key": self.api_key}
+        )
+        response.raise_for_status()
+        data = response.json()
+        
+        self.token = data["access_token"]
+        # Refresh 5 minutes before expiration
+        self.token_expires_at = time.time() + data["expires_in"] - 300
+        return self.token
+    
+    def evaluate(self, record_data: dict, engines: list = None):
+        """Evaluate a criminal record."""
+        token = self.get_token()
+        response = requests.post(
+            f"{self.base_url}/evaluate",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "engines": engines or ["SLM", "CE", "T5"],
+                "record": record_data,
+                "response_format": "short"
+            }
+        )
+        response.raise_for_status()
+        return response.json()
+
+# Usage
+client = PublicRecordsAPIClient(
+    api_key="eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28",
+    base_url="https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app"
+)
+
+result = client.evaluate({
+    "xml": "<ScreeningResults>...</ScreeningResults>",
+    "search_id": "test-123",
+    "search_date": "2024-01-15"
+})
+```
+
+## JavaScript/Node.js
+
+### Basic Authentication and Evaluation
+
+```javascript
+const axios = require('axios');
+
+const API_KEY = 'eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28';
+const BASE_URL = 'https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app';
+
+// Step 1: Get JWT token
+async function getToken() {
+  const response = await axios.post(
+    `${BASE_URL}/auth/token`,
+    {},
+    { headers: { 'X-API-Key': API_KEY } }
+  );
+  return response.data.access_token;
+}
+
+// Step 2: Evaluate a record
+async function evaluateRecord(token, recordData) {
+  const response = await axios.post(
+    `${BASE_URL}/evaluate`,
+    {
+      engines: ['SLM', 'CE', 'T5'],
+      record: recordData,
+      response_format: 'short'
+    },
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+  return response.data;
+}
+
+// Usage
+(async () => {
+  const token = await getToken();
+  const result = await evaluateRecord(token, {
+    xml: '<ScreeningResults>...</ScreeningResults>',
+    search_id: 'test-123',
+    search_date: '2024-01-15',
+    applicant_state: 'CA',
+    candidate_info: {
+      first_name: 'John',
+      last_name: 'Doe',
+      date_of_birth: '1990-05-15'
+    }
+  });
+  console.log(result);
+})();
+```
+
+### Token Caching with Auto-Refresh
+
+```javascript
+const axios = require('axios');
+
+class PublicRecordsAPIClient {
+  constructor(apiKey, baseUrl) {
+    this.apiKey = apiKey;
+    this.baseUrl = baseUrl;
+    this.token = null;
+    this.tokenExpiresAt = 0;
+  }
+
+  async getToken() {
+    // Refresh if expired or expiring soon (5 min buffer)
+    if (this.token && Date.now() < this.tokenExpiresAt - 300000) {
+      return this.token;
+    }
+
+    const response = await axios.post(
+      `${this.baseUrl}/auth/token`,
+      {},
+      { headers: { 'X-API-Key': this.apiKey } }
+    );
+
+    this.token = response.data.access_token;
+    this.tokenExpiresAt = Date.now() + (response.data.expires_in * 1000);
+    return this.token;
+  }
+
+  async evaluate(recordData, engines = ['SLM', 'CE', 'T5']) {
+    const token = await this.getToken();
+    const response = await axios.post(
+      `${this.baseUrl}/evaluate`,
+      {
+        engines,
+        record: recordData,
+        response_format: 'short'
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  }
+}
+
+// Usage
+const client = new PublicRecordsAPIClient(
+  'eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28',
+  'https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app'
+);
+
+client.evaluate({
+  xml: '<ScreeningResults>...</ScreeningResults>',
+  search_id: 'test-123',
+  search_date: '2024-01-15'
+}).then(result => console.log(result));
+```
+
+## cURL
+
+### Get Token
+
+```bash
+curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/auth/token \
+  -H "X-API-Key: eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28" \
+  -H "Content-Type: application/json"
+```
+
+### Evaluate Record
+
+```bash
+curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "engines": ["SLM", "CE", "T5"],
+    "record": {
+      "xml": "<ScreeningResults><login><account>05022022</account><username>test</username></login><postResults order=\"12345\"><case><case_number>MJ-05003-TR-0006023-2020</case_number><offense_date>20200310</offense_date><jurisdiction_state>PA</jurisdiction_state><chargeinfo><charge>DRIVING WHILE OPERATOR PRIVILEGES SUSPENDED</charge><disposition>GUILTY</disposition></chargeinfo></case></postResults></ScreeningResults>",
+      "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+      "search_date": "2024-01-15",
+      "applicant_state": "CA",
+      "candidate_info": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "middle_name": "A",
+        "date_of_birth": "1990-05-15",
+        "ssn": "123-45-6789",
+        "address": "123 Main St, Los Angeles, CA 90001"
+      },
+      "offense_ids": ["4628347", "234868", "34756"]
+    },
+    "response_format": "short"
+  }'
+```
+
+### Batch Evaluation
+
+```bash
+curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate-batch \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "engines": ["SLM", "CE", "T5"],
+    "records": [
+      {
+        "xml": "<ScreeningResults>...</ScreeningResults>",
+        "search_id": "search-1",
+        "search_date": "2024-01-15"
+      },
+      {
+        "xml": "<ScreeningResults>...</ScreeningResults>",
+        "search_id": "search-2",
+        "search_date": "2024-01-15"
+      }
+    ],
+    "response_format": "short"
+  }'
+```
+
+## Error Handling
+
+### Python Example
+
+```python
+import requests
+
+def evaluate_with_retry(client, record_data, max_retries=3):
+    """Evaluate with automatic token refresh on 401 errors."""
+    for attempt in range(max_retries):
+        try:
+            token = client.get_token()
+            response = requests.post(
+                f"{client.base_url}/evaluate",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "engines": ["SLM", "CE", "T5"],
+                    "record": record_data,
+                    "response_format": "short"
+                }
+            )
+            
+            if response.status_code == 401:
+                # Token expired, refresh and retry
+                client.token = None
+                continue
+            
+            response.raise_for_status()
+            return response.json()
+            
+        except requests.exceptions.RequestException as e:
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(2 ** attempt)  # Exponential backoff
+    
+    raise Exception("Max retries exceeded")
+```
+

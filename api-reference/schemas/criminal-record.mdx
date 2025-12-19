@@ -1,0 +1,218 @@
+---
+title: 'CriminalRecord'
+description: 'Criminal record evaluation request and response schema'
+---
+
+# CriminalRecord Schema
+
+The CriminalRecord object contains all information needed to evaluate a criminal record through the Public Records API. This includes the raw XML data, candidate information, and evaluation configuration.
+
+## Required Fields
+
+<ParamField name="xml" type="string" required>
+  Raw XML string containing criminal record data from screening providers. <br />
+  **Example:** `"<ScreeningResults><login><account>05022022</account></login><postResults><case><case_number>MJ-05003-TR-0006023-2020</case_number></case></postResults></ScreeningResults>"`
+</ParamField>
+
+<ParamField name="search_id" type="string" required>
+  Unique identifier for the search. Must be unique across all evaluations. <br />
+  **Example:** `"76190bc0-e58c-494f-92c5-0c9a47389528"`
+</ParamField>
+
+<ParamField name="search_date" type="string" required>
+  Date when the search was conducted in YYYY-MM-DD format. <br />
+  **Example:** `"2024-01-15"`
+</ParamField>
+
+## Optional Fields
+
+<ParamField name="applicant_state" type="string">
+  State code where the applicant will work or is located. Used for state-specific compliance rules. <br />
+  **Example:** `"CA"`
+</ParamField>
+
+<ParamField name="offense_ids" type="array">
+  List of specific offense IDs to evaluate. If not provided, all offenses in the record will be evaluated. <br />
+  **Example:** `["4628347", "234868", "34756"]`
+</ParamField>
+
+<ParamField name="candidate_info" type="object">
+  Candidate information for identity matching and compliance evaluation. <br />
+  See [CandidateInfo](/api-reference/schemas/candidate-info) for detailed structure.
+</ParamField>
+
+## Complete Example
+
+```json
+{
+  "xml": "<ScreeningResults><login><account>05022022</account><username>test</username></login><postResults order='12345'><case><case_number>MJ-05003-TR-0006023-2020</case_number><offense_date>20200310</offense_date><jurisdiction_state>PA</jurisdiction_state><chargeinfo><charge>DRIVING WHILE OPERATOR PRIVILEGES SUSPENDED</charge><disposition>GUILTY</disposition></chargeinfo></case></postResults></ScreeningResults>",
+  "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+  "search_date": "2024-01-15",
+  "applicant_state": "CA",
+  "offense_ids": ["4628347", "234868", "34756"],
+  "candidate_info": {
+    "first_name": "John",
+    "middle_name": "A",
+    "last_name": "Doe",
+    "date_of_birth": "1990-05-15",
+    "ssn": "123-45-6789",
+    "address": "123 Main St, Los Angeles, CA 90001",
+    "annual_salary": 75000.0
+  }
+}
+```
+
+## Nested Schemas
+
+### CandidateInfo
+
+<ParamField name="first_name" type="string">
+  Candidate's first name **Example:** `"John"`
+</ParamField>
+
+<ParamField name="middle_name" type="string">
+  Candidate's middle name or initial **Example:** `"A"` or `"Michael"`
+</ParamField>
+
+<ParamField name="last_name" type="string">
+  Candidate's last name **Example:** `"Doe"`
+</ParamField>
+
+<ParamField name="date_of_birth" type="string">
+  Date of birth in YYYY-MM-DD format **Example:** `"1990-05-15"`
+</ParamField>
+
+<ParamField name="ssn" type="string">
+  Social Security Number (format: XXX-XX-XXXX) **Example:** `"123-45-6789"`
+</ParamField>
+
+<ParamField name="address" type="string">
+  Full address including street, city, state, and zip code **Example:** `"123 Main St, Los Angeles, CA 90001"`
+</ParamField>
+
+<ParamField name="annual_salary" type="number">
+  Annual salary (used for compliance evaluation) **Example:** `75000.0`
+</ParamField>
+
+## Evaluation Request Structure
+
+When submitting a criminal record for evaluation, wrap it in an evaluation request:
+
+```json
+{
+  "engines": ["SLM", "CE", "T5"],
+  "record": {
+    "xml": "...",
+    "search_id": "...",
+    "search_date": "...",
+    "applicant_state": "CA",
+    "candidate_info": {...}
+  },
+  "response_format": "short"
+}
+```
+
+<ParamField name="engines" type="array" required>
+  List of evaluation engines to use. Available values: `"CE"`, `"SLM"`, `"T5"`. Can use one or multiple engines. <br />
+  **Example:** `["SLM", "CE", "T5"]`
+</ParamField>
+
+<ParamField name="response_format" type="string">
+  Response format: `"short"` (comparison format) or `"detailed"` (full engine responses). Defaults based on number of engines. <br />
+  **Example:** `"short"`
+</ParamField>
+
+## Evaluation Response Structure
+
+The evaluation response contains results from all requested engines:
+
+```json
+{
+  "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+  "correlation_id": "uuid-456",
+  "status": "success",
+  "engines_called": ["SLM", "CE", "T5"],
+  "individual_decisions": {
+    "CE": {...},
+    "SLM": {...},
+    "T5": {...}
+  },
+  "comparison": {
+    "agreement": true,
+    "final_decision": "PASS",
+    "winning_engine": "CE"
+  },
+  "offense_level_comparison": [...],
+  "errors": [],
+  "validation_actions": [],
+  "data": {...},
+  "timing": {
+    "xml_transformer_ms": 1234.56,
+    "compliance_ms": 567.89,
+    "slm_engine_ms": 234.12,
+    "t5_engine_ms": 189.45,
+    "total_ms": 2036.57
+  }
+}
+```
+
+<ResponseField name="search_id" type="string">
+  Unique identifier for the search
+</ResponseField>
+
+<ResponseField name="correlation_id" type="string">
+  Correlation ID for tracking across all services
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Overall status: `"success"`, `"partial"`, or `"failed"`
+</ResponseField>
+
+<ResponseField name="engines_called" type="array">
+  List of engines that were called for evaluation
+</ResponseField>
+
+<ResponseField name="individual_decisions" type="object">
+  Decisions from each engine (keyed by engine name)
+</ResponseField>
+
+<ResponseField name="comparison" type="object">
+  Comparison metrics when multiple engines are used (agreement, final decision, etc.)
+</ResponseField>
+
+<ResponseField name="offense_level_comparison" type="array">
+  Offense-level comparison details when multiple engines are used
+</ResponseField>
+
+<ResponseField name="errors" type="array">
+  List of error messages if any services failed
+</ResponseField>
+
+<ResponseField name="validation_actions" type="array">
+  Validation warnings or errors that require attention
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Main evaluation data (format depends on response_format)
+</ResponseField>
+
+<ResponseField name="timing" type="object">
+  Timing information for each service in milliseconds
+</ResponseField>
+
+## Validation Rules
+
+- **XML Format**: Must be valid XML from supported screening providers
+- **Search ID**: Must be unique and non-empty
+- **Date Format**: All dates must be in YYYY-MM-DD format
+- **SSN Format**: If provided, must follow XXX-XX-XXXX pattern
+- **Engines**: At least one engine must be specified
+- **Offense IDs**: Must be valid offense IDs from the XML if provided
+
+## Related Documentation
+
+- [Evaluate Endpoint](/api-reference/endpoints/evaluate) - How to submit evaluation requests
+- [Batch Evaluate Endpoint](/api-reference/endpoints/evaluate-batch) - Process multiple records
+- [CandidateInfo Schema](/api-reference/schemas/candidate-info) - Detailed candidate information structure
+- [Evaluation Response Schema](/api-reference/schemas/evaluation-response) - Complete response structure
+

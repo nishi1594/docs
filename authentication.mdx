@@ -1,0 +1,140 @@
+---
+title: Authentication
+---
+
+# Authentication
+
+The Public Records API uses JWT (JSON Web Tokens) for authentication. All protected endpoints require a valid JWT token in the `Authorization` header.
+
+## Overview
+
+The authentication flow consists of three steps:
+
+1. **Get your API key** from your account manager
+2. **Exchange API key for JWT token** using the `/auth/token` endpoint
+3. **Use the token** in the `Authorization` header for all API requests
+
+## Step 1: Get Your API Key
+
+Your API key will be provided by the Public Records API team. Contact your account manager if you need a new API key.
+
+**API Key Format:** `eval-api-key-<random-string>`
+
+## Step 2: Exchange API Key for JWT Token
+
+Use your API key to obtain a JWT token that will be used for authenticated requests.
+
+### Endpoint
+
+<Endpoint method="POST" url="/auth/token" />
+
+### Request
+
+<ParamField body="header" name="X-API-Key" type="string" required>
+  Your API key provided by the Public Records API team
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/auth/token \
+  -H "X-API-Key: YOUR_API_KEY_HERE" \
+  -H "Content-Type: application/json"
+```
+
+### Response
+
+<ResponseField name="access_token" type="string">
+  JWT token to use for authenticated requests
+</ResponseField>
+
+<ResponseField name="token_type" type="string">
+  Always "bearer"
+</ResponseField>
+
+<ResponseField name="expires_in" type="integer">
+  Token expiration time in seconds (default: 7200 seconds / 2 hours)
+</ResponseField>
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "expires_in": 7200
+}
+```
+
+### Important Notes
+
+- Token expires in **2 hours** (7200 seconds)
+- Store the token securely
+- Get a new token when it expires
+- Do not expose your API key in client-side code
+
+## Step 3: Use Token for API Calls
+
+Include the token in the `Authorization` header for all protected endpoints:
+
+<ParamField body="header" name="Authorization" type="string" required>
+  Bearer token: `Bearer YOUR_TOKEN_HERE`
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "engines": ["SLM", "CE", "T5"],
+    "record": {
+      "xml": "<ScreeningResults>...</ScreeningResults>",
+      "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+      "search_date": "2024-01-15"
+    }
+  }'
+```
+
+## Error Responses
+
+### 401 Unauthorized - Missing Token
+
+```json
+{
+  "detail": "Authentication required. Provide Bearer token."
+}
+```
+
+### 401 Unauthorized - Invalid Token
+
+```json
+{
+  "detail": "Token validation failed: Token has expired"
+}
+```
+
+### 401 Unauthorized - Invalid API Key
+
+```json
+{
+  "detail": "Invalid API key."
+}
+```
+
+## Best Practices
+
+1. **Token Management:**
+   - Cache tokens and refresh before expiration
+   - Handle 401 errors by getting a new token
+   - Don't hardcode tokens in client code
+
+2. **Security:**
+   - Never expose API keys in client-side code
+   - Use environment variables for API keys
+   - Rotate API keys periodically
+
+3. **Error Handling:**
+   - Always check response status codes
+   - Implement retry logic for 401 errors
+   - Log authentication errors for debugging
+

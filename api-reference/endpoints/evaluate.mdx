@@ -1,0 +1,207 @@
+---
+title: 'Evaluate'
+description: 'Evaluate a single criminal record through multiple AI engines'
+---
+
+# Evaluate Endpoint
+
+Evaluate a single criminal record through one or more evaluation engines (Compliance Engine, SLM Engine, T5 Model API).
+
+<Endpoint method="POST" url="/evaluate" />
+
+## Authentication
+
+<ParamField body="header" name="Authorization" type="string" required>
+  Bearer token: `Bearer YOUR_JWT_TOKEN`
+</ParamField>
+
+## Request Body
+
+<ParamField body="body" name="engines" type="array" required>
+  List of evaluation engines to call. Available values: `"CE"`, `"SLM"`, `"T5"`. Can use one or multiple engines. <br />
+  **Example:** `["SLM", "CE", "T5"]`
+</ParamField>
+
+<ParamField body="body" name="record" type="object" required>
+  Criminal record data. See [CriminalRecord Schema](/api-reference/schemas/criminal-record) for complete structure.
+</ParamField>
+
+<ParamField body="body" name="response_format" type="string">
+  Response format: `"short"` (comparison format) or `"detailed"` (full engine responses). <br />
+  - Defaults to `"short"` when multiple engines are used <br />
+  - Defaults to `"detailed"` when single engine is used <br />
+  **Example:** `"short"`
+</ParamField>
+
+## Request Example
+
+```bash
+curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "engines": ["SLM", "CE", "T5"],
+    "record": {
+      "xml": "<ScreeningResults><login><account>05022022</account><username>test</username></login><postResults order=\"12345\"><case><case_number>MJ-05003-TR-0006023-2020</case_number><offense_date>20200310</offense_date><jurisdiction_state>PA</jurisdiction_state><chargeinfo><charge>DRIVING WHILE OPERATOR PRIVILEGES SUSPENDED</charge><disposition>GUILTY</disposition></chargeinfo></case></postResults></ScreeningResults>",
+      "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+      "search_date": "2024-01-15",
+      "applicant_state": "CA",
+      "candidate_info": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "date_of_birth": "1990-05-15",
+        "ssn": "123-45-6789",
+        "address": "123 Main St, Los Angeles, CA 90001"
+      },
+      "offense_ids": ["4628347", "234868", "34756"]
+    },
+    "response_format": "short"
+  }'
+```
+
+## Response
+
+### Success Response (200)
+
+<ResponseField name="search_id" type="string">
+  Unique identifier for the search
+</ResponseField>
+
+<ResponseField name="correlation_id" type="string">
+  Correlation ID for tracking across all services
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Overall status: `"success"`, `"partial"`, or `"failed"`
+</ResponseField>
+
+<ResponseField name="engines_called" type="array">
+  List of engines that were called
+</ResponseField>
+
+<ResponseField name="individual_decisions" type="object">
+  Decisions from each engine (keyed by engine name)
+</ResponseField>
+
+<ResponseField name="comparison" type="object">
+  Comparison metrics when multiple engines are used
+</ResponseField>
+
+<ResponseField name="offense_level_comparison" type="array">
+  Offense-level comparison details
+</ResponseField>
+
+<ResponseField name="errors" type="array">
+  List of error messages if any services failed
+</ResponseField>
+
+<ResponseField name="validation_actions" type="array">
+  Validation warnings or errors
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Main evaluation data (format depends on response_format)
+</ResponseField>
+
+<ResponseField name="timing" type="object">
+  Timing information for each service in milliseconds
+</ResponseField>
+
+```json
+{
+  "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+  "correlation_id": "uuid-456",
+  "status": "success",
+  "engines_called": ["SLM", "CE", "T5"],
+  "individual_decisions": {
+    "CE": {
+      "decision": "PASS",
+      "confidence": 0.95
+    },
+    "SLM": {
+      "decision": "PASS",
+      "confidence": 0.92
+    },
+    "T5": {
+      "decision": "PASS",
+      "confidence": 0.88
+    }
+  },
+  "comparison": {
+    "agreement": true,
+    "final_decision": "PASS",
+    "winning_engine": "CE"
+  },
+  "offense_level_comparison": [],
+  "errors": [],
+  "validation_actions": [],
+  "data": {
+    "searchId": "76190bc0-e58c-494f-92c5-0c9a47389528",
+    "cases": [...],
+    "summary": {...}
+  },
+  "timing": {
+    "xml_transformer_ms": 1234.56,
+    "compliance_ms": 567.89,
+    "slm_engine_ms": 234.12,
+    "t5_engine_ms": 189.45,
+    "total_ms": 2036.57
+  }
+}
+```
+
+### Partial Success Response (206)
+
+When some engines fail but others succeed:
+
+```json
+{
+  "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+  "status": "partial",
+  "engines_called": ["SLM", "CE", "T5"],
+  "individual_decisions": {
+    "CE": {...},
+    "SLM": {...}
+  },
+  "errors": [
+    "T5 Engine failed: HTTP 500: Internal server error"
+  ],
+  ...
+}
+```
+
+## Status Codes
+
+- `200` - Success (all engines completed)
+- `206` - Partial success (some engines failed)
+- `401` - Authentication required or token expired
+- `422` - Validation error
+- `500` - Server error
+
+## Error Responses
+
+### 401 Unauthorized
+
+```json
+{
+  "detail": "Authentication required. Provide Bearer token."
+}
+```
+
+### 422 Validation Error
+
+```json
+{
+  "detail": {
+    "error": "Validation error",
+    "message": "Missing required field: search_id"
+  }
+}
+```
+
+## Related Documentation
+
+- [CriminalRecord Schema](/api-reference/schemas/criminal-record) - Complete request structure
+- [Batch Evaluate](/api-reference/endpoints/evaluate-batch) - Process multiple records
+- [Authentication](/authentication) - How to get JWT tokens
+
