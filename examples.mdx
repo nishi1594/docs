@@ -14,7 +14,7 @@ Complete code examples for integrating with the Public Records API in various pr
 import requests
 
 # Configuration
-API_KEY = "eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28"
+API_KEY = "YOUR_API_KEY_HERE"
 BASE_URL = "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app"
 
 # Step 1: Get JWT token
@@ -110,7 +110,7 @@ class PublicRecordsAPIClient:
 
 # Usage
 client = PublicRecordsAPIClient(
-    api_key="eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28",
+    api_key="YOUR_API_KEY_HERE",
     base_url="https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app"
 )
 
@@ -128,7 +128,7 @@ result = client.evaluate({
 ```javascript
 const axios = require('axios');
 
-const API_KEY = 'eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28';
+const API_KEY = 'YOUR_API_KEY_HERE';
 const BASE_URL = 'https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app';
 
 // Step 1: Get JWT token
@@ -230,7 +230,7 @@ class PublicRecordsAPIClient {
 
 // Usage
 const client = new PublicRecordsAPIClient(
-  'eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28',
+  'YOUR_API_KEY_HERE',
   'https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app'
 );
 
@@ -247,7 +247,7 @@ client.evaluate({
 
 ```bash
 curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/auth/token \
-  -H "X-API-Key: eval-api-key-4d8cebd8baaa9844cc2c5a975b7afa28" \
+  -H "X-API-Key: YOUR_API_KEY_HERE" \
   -H "Content-Type: application/json"
 ```
 
