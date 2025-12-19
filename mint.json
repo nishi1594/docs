@@ -3,10 +3,10 @@
   "name": "Theary Background Check API Documentation",
   "version": "1.0.0",
   "logo": {
-    "dark": "/assets/logo.png",
-    "light": "/assets/logo.png"
+    "dark": "/logo/logo.jpg",
+    "light": "/logo/logo.jpg"
   },
-  "favicon": "/assets/logo.png",
+  "favicon": "/logo/logo.jpg",
   "colors": {
     "primary": "#0D9373",
     "light": "#07C983",
