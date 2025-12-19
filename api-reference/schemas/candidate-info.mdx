@@ -43,6 +43,51 @@ All fields are optional, but providing more information improves accuracy of ide
   **Example:** `75000.0`
 </ParamField>
 
+<ParamField name="source_type" type="string">
+  Data source identifier indicating where the criminal record data originated. <br />
+  **Example:** `"court_records"`, `"state_repository"`, `"federal_database"`
+</ParamField>
+
+<ParamField name="source_reliability_rating" type="string">
+  Rating of source reliability indicating the trustworthiness of the data source. <br />
+  **Example:** `"high"`, `"medium"`, `"low"`
+</ParamField>
+
+<ParamField name="verification_status" type="string">
+  Verification state indicating whether the candidate information has been verified. <br />
+  **Example:** `"verified"`, `"pending"`, `"unverified"`
+</ParamField>
+
+<ParamField name="veteran_status" type="string">
+  Candidate's veteran status. <br />
+  **Example:** `"veteran"`, `"non-veteran"`, `"unknown"`
+</ParamField>
+
+<ParamField name="industry_sector" type="string">
+  Industry sector of the employer or job position. Used for industry-specific compliance rules. <br />
+  **Example:** `"healthcare"`, `"financial_services"`, `"technology"`, `"transportation"`
+</ParamField>
+
+<ParamField name="job_duties" type="string">
+  Description of job duties and responsibilities. Used for role-specific compliance evaluation. <br />
+  **Example:** `"Patient care and medical procedures"`, `"Financial transactions and account management"`
+</ParamField>
+
+<ParamField name="employer_attestation" type="string">
+  Employer attestation details or certification information. <br />
+  **Example:** `"Employer certified candidate meets all requirements"`
+</ParamField>
+
+<ParamField name="registry_status" type="string">
+  Registry status information. <br />
+  **Example:** `"active"`, `"inactive"`, `"pending"`
+</ParamField>
+
+<ParamField name="registry_active" type="boolean">
+  Whether the registry entry is currently active. <br />
+  **Example:** `true`, `false`
+</ParamField>
+
 ## Complete Example
 
 ```json
@@ -53,7 +98,16 @@ All fields are optional, but providing more information improves accuracy of ide
   "date_of_birth": "1990-05-15",
   "ssn": "123-45-6789",
   "address": "123 Main St, Los Angeles, CA 90001",
-  "annual_salary": 75000.0
+  "annual_salary": 75000.0,
+  "source_type": "court_records",
+  "source_reliability_rating": "high",
+  "verification_status": "verified",
+  "veteran_status": "non-veteran",
+  "industry_sector": "healthcare",
+  "job_duties": "Patient care and medical procedures",
+  "employer_attestation": "Employer certified candidate meets all requirements",
+  "registry_status": "active",
+  "registry_active": true
 }
 ```
 
@@ -74,7 +128,10 @@ CandidateInfo is included in the `record` object when submitting an evaluation:
       "last_name": "Doe",
       "date_of_birth": "1990-05-15",
       "ssn": "123-45-6789",
-      "address": "123 Main St, Los Angeles, CA 90001"
+      "address": "123 Main St, Los Angeles, CA 90001",
+      "source_type": "court_records",
+      "verification_status": "verified",
+      "industry_sector": "healthcare"
     }
   }
 }
@@ -96,6 +153,23 @@ Candidate information is used for compliance rule evaluation:
 - **Age-based rules**: Date of birth determines age at time of offense
 - **Salary-based rules**: Annual salary determines position level and applicable rules
 - **State-specific rules**: Address and applicant_state determine state-specific compliance requirements
+- **Industry-specific rules**: Industry sector determines applicable regulatory requirements
+- **Role-specific rules**: Job duties determine position-specific compliance checks
+- **Veteran status**: Used for veteran-specific compliance considerations
+
+## Pass-Through Fields
+
+The following fields are pass-through only and are stored in BigQuery for analytics and auditing purposes. They do not require processing or transformation:
+
+- `source_type` - Data source identifier
+- `source_reliability_rating` - Source reliability rating
+- `verification_status` - Verification state
+- `veteran_status` - Veteran status
+- `industry_sector` - Industry sector
+- `job_duties` - Job duties description
+- `employer_attestation` - Employer attestation details
+- `registry_status` - Registry status
+- `registry_active` - Registry active status
 
 ## Validation Rules
 

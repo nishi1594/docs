@@ -57,7 +57,16 @@ The CriminalRecord object contains all information needed to evaluate a criminal
     "date_of_birth": "1990-05-15",
     "ssn": "123-45-6789",
     "address": "123 Main St, Los Angeles, CA 90001",
-    "annual_salary": 75000.0
+    "annual_salary": 75000.0,
+    "source_type": "court_records",
+    "source_reliability_rating": "high",
+    "verification_status": "verified",
+    "veteran_status": "non-veteran",
+    "industry_sector": "healthcare",
+    "job_duties": "Patient care and medical procedures",
+    "employer_attestation": "Employer certified candidate meets all requirements",
+    "registry_status": "active",
+    "registry_active": true
   }
 }
 ```
@@ -92,6 +101,42 @@ The CriminalRecord object contains all information needed to evaluate a criminal
 
 <ParamField name="annual_salary" type="number">
   Annual salary (used for compliance evaluation) **Example:** `75000.0`
+</ParamField>
+
+<ParamField name="source_type" type="string">
+  Data source identifier **Example:** `"court_records"`, `"state_repository"`
+</ParamField>
+
+<ParamField name="source_reliability_rating" type="string">
+  Source reliability rating **Example:** `"high"`, `"medium"`, `"low"`
+</ParamField>
+
+<ParamField name="verification_status" type="string">
+  Verification status **Example:** `"verified"`, `"pending"`, `"unverified"`
+</ParamField>
+
+<ParamField name="veteran_status" type="string">
+  Veteran status **Example:** `"veteran"`, `"non-veteran"`
+</ParamField>
+
+<ParamField name="industry_sector" type="string">
+  Industry sector **Example:** `"healthcare"`, `"financial_services"`
+</ParamField>
+
+<ParamField name="job_duties" type="string">
+  Job duties description **Example:** `"Patient care and medical procedures"`
+</ParamField>
+
+<ParamField name="employer_attestation" type="string">
+  Employer attestation details **Example:** `"Employer certified candidate meets all requirements"`
+</ParamField>
+
+<ParamField name="registry_status" type="string">
+  Registry status **Example:** `"active"`, `"inactive"`
+</ParamField>
+
+<ParamField name="registry_active" type="boolean">
+  Registry active status **Example:** `true`, `false`
 </ParamField>
 
 ## Evaluation Request Structure
