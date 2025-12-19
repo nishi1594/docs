@@ -49,14 +49,18 @@
             "pages": [
               "api-reference/endpoints/health",
               "api-reference/endpoints/evaluate",
-              "api-reference/endpoints/evaluate-batch"
+              "api-reference/endpoints/evaluate-batch",
+              "api-reference/endpoints/identity-match"
             ]
           },
           {
             "group": "Schemas",
             "pages": [
               "api-reference/schemas/criminal-record",
-              "api-reference/schemas/candidate-info"
+              "api-reference/schemas/candidate-info",
+              "api-reference/schemas/identity-match-input",
+              "api-reference/schemas/alias-info",
+              "api-reference/schemas/address-info"
             ]
           },
           {
@@ -88,3 +92,4 @@
     "maintainOrder": true
   }
 }
+

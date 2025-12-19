@@ -1,0 +1,127 @@
+---
+title: 'IdentityMatchInput'
+description: 'Identity information for matching candidate against criminal records'
+---
+
+# IdentityMatchInput Schema
+
+The IdentityMatchInput object contains identity information used for matching a candidate against a criminal record subject. This schema is used in the identity matching endpoint to compare two identities.
+
+## Required Fields
+
+Both `candidateToVerify` and `candidateInRecord` are required in the request, but individual fields within each are optional.
+
+## Optional Fields
+
+<ParamField name="firstName" type="string">
+  First name of the candidate **Example:** `"CODY"`
+</ParamField>
+
+<ParamField name="middleName" type="string">
+  Middle name of the candidate **Example:** `"MICHAEL"`
+</ParamField>
+
+<ParamField name="lastName" type="string">
+  Last name of the candidate **Example:** `"WARD"`
+</ParamField>
+
+<ParamField name="dateOfBirth" type="string">
+  Date of birth in YYYY-MM-DD format. Must be a valid date. <br />
+  **Example:** `"1983-05-18"`
+</ParamField>
+
+<ParamField name="ssn" type="string">
+  Social Security Number. Used for exact matching when available. <br />
+  **Example:** `"123-45-6789"` or `""`
+</ParamField>
+
+<ParamField name="state" type="string">
+  State abbreviation **Example:** `"CA"`, `"NY"`
+</ParamField>
+
+<ParamField name="annualSalary" type="number">
+  Annual salary **Example:** `75000.0`
+</ParamField>
+
+<ParamField name="aliases" type="array">
+  List of aliases for the candidate. See [AliasInfo Schema](/api-reference/schemas/alias-info) for structure.
+</ParamField>
+
+<ParamField name="addresses" type="array">
+  List of addresses for the candidate. See [AddressInfo Schema](/api-reference/schemas/address-info) for structure.
+</ParamField>
+
+## Complete Example
+
+```json
+{
+  "firstName": "CODY",
+  "middleName": "MICHAEL",
+  "lastName": "WARD",
+  "dateOfBirth": "1983-05-18",
+  "ssn": "123-45-6789",
+  "state": "NV",
+  "annualSalary": 75000.0,
+  "aliases": [
+    {
+      "firstName": "CODY",
+      "lastName": "WARD"
+    }
+  ],
+  "addresses": [
+    {
+      "streetOne": "3209 ORANGE ORCHARD PL #3 NORTH LAS VEGAS, NV 89084",
+      "streetTwo": "",
+      "city": "NORTH LAS VEGAS",
+      "stateOrProvince": "NV",
+      "postalCode": "89084",
+      "country": "US",
+      "addressType": "DOMESTIC",
+      "startDate": "2020-01-01",
+      "endDate": ""
+    }
+  ]
+}
+```
+
+## Usage in Identity Match Request
+
+IdentityMatchInput is used in both `candidateToVerify` and `candidateInRecord`:
+
+```json
+{
+  "candidateToVerify": {
+    "firstName": "CODY",
+    "lastName": "WARD",
+    "dateOfBirth": "1983-05-18",
+    "addresses": [...]
+  },
+  "candidateInRecord": {
+    "firstName": "RYAN",
+    "lastName": "GOSLING",
+    "dateOfBirth": "1892-10-03",
+    "addresses": [...]
+  }
+}
+```
+
+## Matching Algorithm
+
+The identity matching algorithm evaluates:
+
+- **Name Matching**: Fuzzy matching on first, middle, and last names, including aliases
+- **Date of Birth**: Exact or near-match comparison
+- **SSN**: Exact match when both SSNs are provided
+- **Address**: Address history matching with fuzzy comparison
+
+## Validation Rules
+
+- **Date Format**: `dateOfBirth` must be in YYYY-MM-DD format and represent a valid date
+- **Address Dates**: `startDate` and `endDate` in addresses must be in YYYY-MM-DD format if provided
+
+## Related Documentation
+
+- [Identity Match Endpoint](/api-reference/endpoints/identity-match) - How to use identity matching
+- [AliasInfo Schema](/api-reference/schemas/alias-info) - Alias structure
+- [AddressInfo Schema](/api-reference/schemas/address-info) - Address structure
+

@@ -1,0 +1,111 @@
+---
+title: 'AddressInfo'
+description: 'Address information for identity matching'
+---
+
+# AddressInfo Schema
+
+The AddressInfo object represents an address associated with a candidate. Multiple addresses can be provided to represent address history, which improves identity matching accuracy.
+
+## Optional Fields
+
+<ParamField name="streetOne" type="string">
+  Primary street address **Example:** `"3209 ORANGE ORCHARD PL #3 NORTH LAS VEGAS, NV 89084"`
+</ParamField>
+
+<ParamField name="streetTwo" type="string">
+  Secondary street address (apartment, suite, etc.) **Example:** `"Apt 4B"`
+</ParamField>
+
+<ParamField name="city" type="string">
+  City **Example:** `"NORTH LAS VEGAS"`
+</ParamField>
+
+<ParamField name="stateOrProvince" type="string">
+  State or province abbreviation **Example:** `"NV"`, `"CA"`
+</ParamField>
+
+<ParamField name="postalCode" type="string">
+  Postal/ZIP code **Example:** `"89084"`
+</ParamField>
+
+<ParamField name="country" type="string">
+  Country code **Example:** `"US"`
+</ParamField>
+
+<ParamField name="addressType" type="string">
+  Address type classification **Example:** `"DOMESTIC"`, `"INTERNATIONAL"`
+</ParamField>
+
+<ParamField name="startDate" type="string">
+  Start date for this address in YYYY-MM-DD format. Must be a valid date if provided. <br />
+  **Example:** `"2020-01-01"`
+</ParamField>
+
+<ParamField name="endDate" type="string">
+  End date for this address in YYYY-MM-DD format. Empty string indicates current address. Must be a valid date if provided. <br />
+  **Example:** `"2021-12-31"` or `""` for current address
+</ParamField>
+
+## Complete Example
+
+```json
+{
+  "streetOne": "3209 ORANGE ORCHARD PL #3 NORTH LAS VEGAS, NV 89084",
+  "streetTwo": "",
+  "city": "NORTH LAS VEGAS",
+  "stateOrProvince": "NV",
+  "postalCode": "89084",
+  "country": "US",
+  "addressType": "DOMESTIC",
+  "startDate": "2020-01-01",
+  "endDate": ""
+}
+```
+
+## Address History
+
+Multiple addresses can be provided to represent address history:
+
+```json
+{
+  "addresses": [
+    {
+      "streetOne": "123 Main St",
+      "city": "Los Angeles",
+      "stateOrProvince": "CA",
+      "postalCode": "90001",
+      "country": "US",
+      "addressType": "DOMESTIC",
+      "startDate": "2020-01-01",
+      "endDate": "2021-12-31"
+    },
+    {
+      "streetOne": "456 Oak Ave",
+      "city": "Los Angeles",
+      "stateOrProvince": "CA",
+      "postalCode": "90002",
+      "country": "US",
+      "addressType": "DOMESTIC",
+      "startDate": "2022-01-01",
+      "endDate": ""
+    }
+  ]
+}
+```
+
+## Validation Rules
+
+- **Date Format**: `startDate` and `endDate` must be in YYYY-MM-DD format and represent valid dates
+- **Current Address**: Use empty string `""` for `endDate` to indicate current address
+- **Date Range**: `endDate` should be after `startDate` if both are provided
+
+## Matching Behavior
+
+The identity matching algorithm compares addresses using fuzzy matching. Address history helps improve match accuracy by considering all known addresses for a candidate.
+
+## Related Documentation
+
+- [IdentityMatchInput Schema](/api-reference/schemas/identity-match-input) - Parent schema
+- [Identity Match Endpoint](/api-reference/endpoints/identity-match) - How to use identity matching
+

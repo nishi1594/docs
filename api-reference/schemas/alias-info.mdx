@@ -1,0 +1,63 @@
+---
+title: 'AliasInfo'
+description: 'Alias information for identity matching'
+---
+
+# AliasInfo Schema
+
+The AliasInfo object represents an alternative name or alias for a candidate. Aliases are used in identity matching to improve match accuracy when candidates may have used different names.
+
+## Optional Fields
+
+<ParamField name="firstName" type="string">
+  First name alias **Example:** `"JONATHAN"`
+</ParamField>
+
+<ParamField name="middleName" type="string">
+  Middle name alias **Example:** `"MICHAEL"`
+</ParamField>
+
+<ParamField name="lastName" type="string">
+  Last name alias **Example:** `"SMITH"`
+</ParamField>
+
+## Complete Example
+
+```json
+{
+  "firstName": "JONATHAN",
+  "middleName": "MICHAEL",
+  "lastName": "SMITH"
+}
+```
+
+## Usage
+
+Aliases are included in the `aliases` array within `IdentityMatchInput`:
+
+```json
+{
+  "firstName": "JOHN",
+  "lastName": "DOE",
+  "aliases": [
+    {
+      "firstName": "JONATHAN",
+      "lastName": "DOE"
+    },
+    {
+      "firstName": "JOHNNY",
+      "lastName": "DOE"
+    }
+  ]
+}
+```
+
+## Matching Behavior
+
+The identity matching algorithm considers all aliases when performing name matching. If the primary name doesn't match but an alias matches, it will contribute to the name score.
+
+## Related Documentation
+
+- [IdentityMatchInput Schema](/api-reference/schemas/identity-match-input) - Parent schema
+- [Identity Match Endpoint](/api-reference/endpoints/identity-match) - How to use identity matching
+

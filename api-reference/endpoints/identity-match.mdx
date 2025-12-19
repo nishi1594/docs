@@ -1,0 +1,183 @@
+---
+title: 'Identity Match'
+description: 'Compare two identity records to determine if they match'
+---
+
+# Identity Match Endpoint
+
+Compare candidate information against a criminal record subject to determine identity match probability. This endpoint uses advanced fuzzy matching algorithms to evaluate name, date of birth, SSN, and address similarities.
+
+<Endpoint method="POST" url="/complianceEngine/identity-match" />
+
+## Base URL
+
+The Identity Match endpoint is part of the Compliance Engine service:
+
+```
+https://compliance-engine-cr-dev-859798439223.us-south1.run.app
+```
+
+## Authentication
+
+No authentication required (internal service endpoint).
+
+## Request Body
+
+<ParamField body="body" name="candidateToVerify" type="object" required>
+  Candidate identity to verify (the person being checked). See [IdentityMatchInput Schema](/api-reference/schemas/identity-match-input) for complete structure.
+</ParamField>
+
+<ParamField body="body" name="candidateInRecord" type="object" required>
+  Candidate identity found in the criminal record (the person in the record). See [IdentityMatchInput Schema](/api-reference/schemas/identity-match-input) for complete structure.
+</ParamField>
+
+## Request Example
+
+```bash
+curl -X POST "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/complianceEngine/identity-match" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "candidateToVerify": {
+      "firstName": "CODY",
+      "lastName": "WARD",
+      "dateOfBirth": "1983-05-18",
+      "ssn": "",
+      "aliases": [],
+      "addresses": [
+        {
+          "streetOne": "3209 ORANGE ORCHARD PL #3 NORTH LAS VEGAS, NV 89084",
+          "addressType": "DOMESTIC",
+          "country": "US"
+        }
+      ]
+    },
+    "candidateInRecord": {
+      "firstName": "RYAN",
+      "lastName": "GOSLING",
+      "dateOfBirth": "1892-10-03",
+      "ssn": "",
+      "aliases": [],
+      "addresses": [
+        {
+          "streetOne": "3209 ORANGE ORCHARD PL #3 NORTH LAS VEGAS, NV 89084",
+          "addressType": "DOMESTIC",
+          "country": "US"
+        }
+      ]
+    }
+  }'
+```
+
+## Response
+
+<ResponseField name="ssnScore" type="number">
+  SSN match score (0-1). Higher values indicate better match.
+</ResponseField>
+
+<ResponseField name="ssnMatchDesc" type="string">
+  Description of SSN match result.
+</ResponseField>
+
+<ResponseField name="dobScore" type="number">
+  Date of birth match score (0-1).
+</ResponseField>
+
+<ResponseField name="dobMatchDesc" type="string">
+  Description of DOB match result.
+</ResponseField>
+
+<ResponseField name="nameScore" type="number">
+  Name match score (0-1). Uses fuzzy matching algorithms.
+</ResponseField>
+
+<ResponseField name="nameMatchDesc" type="string">
+  Description of name match result (e.g., "Exact Name Match", "Low or partial fuzzy Name Match").
+</ResponseField>
+
+<ResponseField name="addressScore" type="number">
+  Address match score (0-1).
+</ResponseField>
+
+<ResponseField name="addresseMatchDesc" type="string">
+  Description of address match result.
+</ResponseField>
+
+<ResponseField name="matchScore" type="number">
+  Overall weighted match score (0-1). Calculated from individual component scores.
+</ResponseField>
+
+<ResponseField name="isMatch" type="boolean">
+  Whether the match threshold is met. `true` indicates a positive match.
+</ResponseField>
+
+<ResponseField name="details" type="string">
+  Detailed breakdown of match scores with weights for each component.
+</ResponseField>
+
+### Success Response (200)
+
+```json
+{
+  "ssnScore": 0,
+  "ssnMatchDesc": "Invalid/Empty SSN(s)",
+  "dobScore": 0,
+  "dobMatchDesc": "No DOB Match",
+  "nameScore": 0.5,
+  "nameMatchDesc": "Low or partial fuzzy Name Match",
+  "addressScore": 1,
+  "addresseMatchDesc": "Exact Address Match",
+  "matchScore": 0.225,
+  "isMatch": false,
+  "details": "SSN Score: 0 % (Weight: 35 %), DOB Score: 0 % (Weight: 30 %), Name/Alias Score: 50 % (Weight: 25 %), Address Score: 100 % (Weight: 10 %)"
+}
+```
+
+## Match Scoring
+
+The identity match algorithm uses weighted scoring across multiple components:
+
+- **SSN Score** (Weight: 35%) - Exact match when SSN is available
+- **DOB Score** (Weight: 30%) - Date of birth comparison
+- **Name/Alias Score** (Weight: 25%) - Fuzzy name matching including aliases
+- **Address Score** (Weight: 10%) - Address history matching
+
+The overall `matchScore` is calculated as a weighted average of these components.
+
+## Status Codes
+
+- `200` - Identity matching completed successfully
+- `400` - Invalid input data or validation error
+- `500` - Internal server error
+
+## Error Responses
+
+### 400 Bad Request - Invalid Format
+
+```json
+{
+  "error": "Invalid request format",
+  "message": "Request body must be a JSON object with 'candidateToVerify' and 'candidateInRecord' properties.",
+  "code": "INVALID_REQUEST_FORMAT"
+}
+```
+
+### 400 Bad Request - Validation Error
+
+```json
+{
+  "error": "Validation failed",
+  "message": "One or more validation errors occurred",
+  "code": "VALIDATION_ERROR",
+  "errors": {
+    "candidateToVerify.dateOfBirth": [
+      "The dateOfBirth field must be in YYYY-MM-DD format (e.g., 1997-08-30). Received: 1997-50-30"
+    ]
+  }
+}
+```
+
+## Related Documentation
+
+- [IdentityMatchInput Schema](/api-reference/schemas/identity-match-input) - Complete input structure
+- [Compliance Engine API](/api-reference/endpoints/compliance-evaluate) - Main compliance evaluation endpoint
+
