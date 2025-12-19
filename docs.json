@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Public Records API Documentation",
+  "name": "Theary Background Check API Documentation",
   "logo": {
     "dark": "/assets/logo.png",
     "light": "/assets/logo.png"
