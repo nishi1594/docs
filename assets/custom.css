@@ -1,0 +1,15 @@
+/* Custom styling for SNH AI branding */
+.mintlify-sidebar .mintlify-logo-text {
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .mintlify-sidebar .mintlify-logo-text {
+  color: #1a1a1a !important;
+}
+
+[data-theme="dark"] .mintlify-sidebar .mintlify-logo-text {
+  color: #ffffff !important;
+}
+

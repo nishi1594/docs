@@ -28,19 +28,16 @@
   },
   "tabs": [
     {
+      "name": "Documentation",
+      "url": "documentation"
+    },
+    {
       "name": "API Reference",
       "url": "api-reference"
     },
     {
       "name": "Guides",
       "url": "guides"
-    }
-  ],
-  "anchors": [
-    {
-      "name": "GitHub",
-      "icon": "github",
-      "url": "https://github.com/theary-ai"
     }
   ],
   "navigation": [

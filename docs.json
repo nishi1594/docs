@@ -28,7 +28,7 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "API Reference",
+        "tab": "Documentation",
         "groups": [
           {
             "group": "Get Started",
@@ -38,7 +38,12 @@
               "authentication",
               "error-handling"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
           {
             "group": "API Reference",
             "pages": [
@@ -73,15 +78,7 @@
         ]
       }
     ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "GitHub",
-          "href": "https://github.com/theary-ai",
-          "icon": "github"
-        }
-      ]
-    }
+    "global": {}
   },
   "api": {
     "playground": {
@@ -91,6 +88,7 @@
       "method": "bearer"
     },
     "maintainOrder": true
-  }
+  },
+  "css": "/assets/custom.css"
 }
 
