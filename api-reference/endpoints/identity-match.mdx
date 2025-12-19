@@ -5,7 +5,30 @@ description: 'Compare two identity records to determine if they match'
 
 # Identity Match Endpoint
 
-Compare candidate information against a criminal record subject to determine identity match probability. This endpoint uses advanced fuzzy matching algorithms including Fellegi-Sunter probabilistic framework, Jaro-Winkler, Soundex, Levenshtein distance, and keyboard distance to evaluate name, date of birth, SSN, and address similarities.
+Compare candidate information against a criminal record subject to determine identity match probability. This endpoint is part of the Public Records API's identity verification system, which uses advanced fuzzy matching algorithms to ensure accurate identity resolution.
+
+## What is Identity Matching?
+
+Identity matching is a critical component of background screening that determines whether a candidate's information matches the subject of a criminal record. This helps prevent false positives by ensuring records are correctly associated with the right individual.
+
+## Matching Capabilities
+
+The identity matching system uses a comprehensive approach:
+
+- **Fellegi-Sunter Probabilistic Framework** - Industry-standard probabilistic matching methodology
+- **Advanced Name Matching**:
+  - Exact matches
+  - Fuzzy matching (Jaro-Winkler, Levenshtein distance)
+  - Soundex phonetic matching
+  - Keyboard distance (typo detection)
+  - Alias database matching (handles nicknames, diminutives)
+  - Substring matching
+  - First letter preservation
+- **Date of Birth Verification** - Accurate DOB comparison
+- **SSN Matching** - Exact match when available
+- **Address Matching** - USPS-standardized address comparison with history
+- **Edge Case Handling** - Confidence adjustment for unusual scenarios
+- **Manual Review Triggers** - Automatic flagging of low-confidence matches
 
 <Endpoint method="POST" url="/complianceEngine/identity-match" />
 
