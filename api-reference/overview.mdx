@@ -1,9 +1,9 @@
 ---
-title: 'Public Records API Overview'
+title: 'Public Records API'
 description: 'AI-powered criminal record evaluation service'
 ---
 
-# Public Records API Overview
+# Public Records API
 
 The Public Records API orchestrates criminal record evaluation through multiple AI-powered decision engines, providing comprehensive compliance assessments and risk analysis.
 
@@ -46,6 +46,7 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
 | Authentication| Exchange API key for JWT token            | `POST /auth/token`                                |
 | Evaluate      | Evaluate a single criminal record         | `POST /evaluate`                                  |
 | Batch Evaluate| Process multiple records in batch         | `POST /evaluate-batch`                            |
+| Identity Match| Compare candidate against record subject | `POST /complianceEngine/identity-match`           |
 
 ## Evaluation Engines
 
