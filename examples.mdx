@@ -53,7 +53,10 @@ result = evaluate_record(token, {
     "candidate_info": {
         "first_name": "John",
         "last_name": "Doe",
-        "date_of_birth": "1990-05-15"
+        "date_of_birth": "1990-05-15",
+        "source_type": "court_records",
+        "verification_status": "verified",
+        "industry_sector": "healthcare"
     }
 })
 print(result)
@@ -171,7 +174,10 @@ async function evaluateRecord(token, recordData) {
     candidate_info: {
       first_name: 'John',
       last_name: 'Doe',
-      date_of_birth: '1990-05-15'
+      date_of_birth: '1990-05-15',
+      source_type: 'court_records',
+      verification_status: 'verified',
+      industry_sector: 'healthcare'
     }
   });
   console.log(result);
@@ -270,7 +276,11 @@ curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app
         "middle_name": "A",
         "date_of_birth": "1990-05-15",
         "ssn": "123-45-6789",
-        "address": "123 Main St, Los Angeles, CA 90001"
+        "address": "123 Main St, Los Angeles, CA 90001",
+        "source_type": "court_records",
+        "source_reliability_rating": "high",
+        "verification_status": "verified",
+        "industry_sector": "healthcare"
       },
       "offense_ids": ["4628347", "234868", "34756"]
     },
