@@ -35,7 +35,8 @@
             "pages": [
               "introduction",
               "quickstart",
-              "authentication"
+              "authentication",
+              "error-handling"
             ]
           },
           {

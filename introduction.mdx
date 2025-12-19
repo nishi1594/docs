@@ -4,7 +4,7 @@ title: Theary Background Check API Documentation
 
 # Welcome to Theary Background Check API Documentation
 
-The Theary Background Check API provides comprehensive criminal record evaluation through multiple AI-powered decision engines. The API orchestrates processing through XML transformation, compliance rule evaluation, and machine learning models to deliver detailed criminal record assessments for background screening.
+The Theary Background Check API provides comprehensive criminal record evaluation for background screening. The API processes public records through identity matching, compliance evaluation, and regulatory analysis to deliver accurate, compliant background check results.
 
 ## About Public Records
 
@@ -15,7 +15,7 @@ The API processes public records data from various sources including:
 - **Federal Databases** - Federal criminal records and watchlists
 - **Registry Data** - Sex offender registries and other specialized registries
 
-All public records are processed through our multi-engine evaluation system to provide accurate, compliant background check results.
+All public records are processed through our comprehensive evaluation system to provide accurate, compliant background check results.
 
 ## API Organization
 
@@ -65,7 +65,6 @@ curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
-    "engines": ["SLM", "CE", "T5"],
     "record": {
       "xml": "<ScreeningResults>...</ScreeningResults>",
       "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",

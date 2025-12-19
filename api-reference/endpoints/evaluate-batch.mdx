@@ -17,19 +17,9 @@ Process multiple criminal records efficiently in a single request. Records are p
 
 ## Request Body
 
-<ParamField body="body" name="engines" type="array" required>
-  List of evaluation engines to call. Available values: `"CE"`, `"SLM"`, `"T5"`. <br />
-  **Example:** `["SLM", "CE", "T5"]`
-</ParamField>
-
 <ParamField body="body" name="records" type="array" required>
   Array of criminal record objects. Each record follows the [CriminalRecord Schema](/api-reference/schemas/criminal-record). <br />
   **Minimum:** 1 record, **Maximum:** 100 records per batch
-</ParamField>
-
-<ParamField body="body" name="response_format" type="string">
-  Response format: `"short"` or `"detailed"`. Defaults based on number of engines. <br />
-  **Example:** `"short"`
 </ParamField>
 
 <ParamField body="body" name="max_concurrent" type="integer">
@@ -44,7 +34,6 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "engines": ["SLM", "CE", "T5"],
     "records": [
       {
         "xml": "<ScreeningResults>...</ScreeningResults>",
@@ -65,7 +54,6 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
         "applicant_state": "NY"
       }
     ],
-    "response_format": "short",
     "max_concurrent": 5
   }'
 ```
@@ -105,8 +93,7 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
         "search_id": "search-1",
         "correlation_id": "uuid-456",
         "status": "success",
-        "engines_called": ["SLM", "CE", "T5"],
-        "individual_decisions": {...},
+        "decision": "PASS",
         "data": {...},
         "timing": {...}
       },

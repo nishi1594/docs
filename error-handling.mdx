@@ -1,0 +1,349 @@
+---
+title: 'Error Handling'
+description: 'Learn how to handle errors and troubleshoot common issues with the Public Records API'
+---
+
+# Error Handling
+
+The Public Records API uses conventional HTTP response codes and returns detailed error information to help you troubleshoot issues.
+
+## HTTP Status Codes
+
+The API uses the following HTTP status codes:
+
+| Status Code | Description                                                 |
+| ----------- | ----------------------------------------------------------- |
+| `200`       | Success - Request completed successfully                    |
+| `206`       | Partial Success - Some processing completed, but errors occurred |
+| `400`       | Bad Request - Invalid parameters or missing required fields |
+| `401`       | Unauthorized - Invalid or missing authentication            |
+| `422`       | Validation Error - Request validation failed                |
+| `500`       | Internal Server Error - Something went wrong on our end     |
+
+## Error Response Format
+
+All error responses follow a consistent format:
+
+```json
+{
+  "detail": "Error message describing what went wrong"
+}
+```
+
+For validation errors with multiple issues:
+
+```json
+{
+  "detail": {
+    "error": "Validation error",
+    "message": "One or more validation errors occurred",
+    "errors": {
+      "record.search_id": [
+        "search_id is required"
+      ],
+      "record.candidate_info.date_of_birth": [
+        "date_of_birth must be in YYYY-MM-DD format"
+      ]
+    }
+  }
+}
+```
+
+## Common Error Scenarios
+
+### Authentication Errors (401)
+
+**Missing Authorization Header:**
+
+```json
+{
+  "detail": "Authentication required. Provide Bearer token."
+}
+```
+
+**Invalid or Expired Token:**
+
+```json
+{
+  "detail": "Invalid or expired token"
+}
+```
+
+**Solution:** Get a new token from `/auth/token` endpoint.
+
+### Validation Errors (400, 422)
+
+**Missing Required Fields:**
+
+```json
+{
+  "detail": {
+    "error": "Validation error",
+    "message": "Missing required field: search_id"
+  }
+}
+```
+
+**Invalid Date Format:**
+
+```json
+{
+  "detail": {
+    "error": "Validation error",
+    "message": "One or more validation errors occurred",
+    "errors": {
+      "record.candidate_info.date_of_birth": [
+        "date_of_birth must be in YYYY-MM-DD format (e.g., 1990-05-15). Received: 1990-50-15"
+      ]
+    }
+  }
+}
+```
+
+**Invalid XML Format:**
+
+```json
+{
+  "detail": {
+    "error": "Invalid XML",
+    "message": "Failed to parse XML data"
+  }
+}
+```
+
+### Partial Success (206)
+
+When some processing completes but errors occur:
+
+```json
+{
+  "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+  "status": "partial",
+  "errors": [
+    "T5 Engine failed: HTTP 500: Internal server error"
+  ],
+  "data": {
+    "comparison": {...}
+  }
+}
+```
+
+### Server Errors (500)
+
+```json
+{
+  "detail": "Internal server error. Please try again later."
+}
+```
+
+## Error Handling Best Practices
+
+### 1. Always Check Status Codes
+
+```javascript
+const response = await fetch('https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate', {
+  method: 'POST',
+  headers: {
+    Authorization: 'Bearer YOUR_JWT_TOKEN',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(recordData),
+})
+
+if (!response.ok) {
+  const errorData = await response.json()
+  console.error('API Error:', errorData)
+
+  // Handle specific error types
+  switch (response.status) {
+    case 400:
+    case 422:
+      console.error('Validation Error:', errorData.detail)
+      break
+    case 401:
+      console.error('Authentication Error - Check your token')
+      // Refresh token and retry
+      break
+    case 206:
+      console.warn('Partial Success:', errorData.errors)
+      // Process partial results if acceptable
+      break
+    case 500:
+      console.error('Server Error - Retry may help')
+      break
+    default:
+      console.error('Unexpected error:', response.status)
+  }
+
+  throw new Error(`API Error: ${response.status}`)
+}
+
+const data = await response.json()
+```
+
+### 2. Handle Validation Errors
+
+```python
+import requests
+
+try:
+    response = requests.post(
+        'https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate',
+        headers={
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        },
+        json=record_data
+    )
+    response.raise_for_status()
+    return response.json()
+except requests.exceptions.HTTPError as e:
+    if e.response.status_code in [400, 422]:
+        error_data = e.response.json()
+        detail = error_data.get('detail', {})
+        
+        if isinstance(detail, dict) and 'errors' in detail:
+            # Multiple validation errors
+            for field, messages in detail['errors'].items():
+                for message in messages:
+                    print(f"Validation Error ({field}): {message}")
+        else:
+            # Single error message
+            error_msg = detail if isinstance(detail, str) else detail.get('message', 'Validation failed')
+            print(f"Error: {error_msg}")
+    elif e.response.status_code == 401:
+        print("Authentication failed - check your JWT token")
+    elif e.response.status_code == 206:
+        print("Partial success - some processing failed")
+        # May still want to process the response
+        return e.response.json()
+    else:
+        print(f"HTTP Error {e.response.status_code}: {e.response.text}")
+    raise
+```
+
+### 3. Implement Retry Logic
+
+For transient errors (500, network issues), implement exponential backoff:
+
+```javascript
+async function evaluateWithRetry(recordData, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch('https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate', {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer YOUR_JWT_TOKEN',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(recordData),
+      })
+
+      if (response.ok || response.status === 206) {
+        return await response.json()
+      }
+
+      // Don't retry client errors (4xx)
+      if (response.status >= 400 && response.status < 500) {
+        throw new Error(`Client Error: ${response.status}`)
+      }
+
+      // Retry server errors (5xx)
+      if (attempt === maxRetries) {
+        throw new Error(`Server Error after ${maxRetries} attempts: ${response.status}`)
+      }
+
+      // Wait before retry (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+    } catch (error) {
+      if (attempt === maxRetries) throw error
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+    }
+  }
+}
+```
+
+## Troubleshooting Common Issues
+
+### Issue: "Authentication required. Provide Bearer token."
+
+**Cause:** Missing or invalid Authorization header.
+
+**Solution:** Include the Bearer token in the Authorization header:
+
+```bash
+curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+### Issue: "Invalid or expired token"
+
+**Cause:** JWT token has expired (default: 2 hours).
+
+**Solution:** Get a new token from `/auth/token` endpoint:
+
+```bash
+curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/auth/token \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+### Issue: "Missing required field: search_id"
+
+**Cause:** Required field is missing from the request.
+
+**Solution:** Ensure all required fields are included:
+
+```json
+{
+  "record": {
+    "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
+    "search_date": "2024-01-15",
+    "xml": "<ScreeningResults>...</ScreeningResults>"
+  }
+}
+```
+
+### Issue: "date_of_birth must be in YYYY-MM-DD format"
+
+**Cause:** Date format is incorrect.
+
+**Solution:** Use YYYY-MM-DD format:
+
+```json
+{
+  "candidate_info": {
+    "date_of_birth": "1990-05-15"  // ✅ Correct
+    // "date_of_birth": "05/15/1990"  // ❌ Wrong
+  }
+}
+```
+
+### Issue: "Failed to parse XML data"
+
+**Cause:** Invalid or malformed XML in the request.
+
+**Solution:** Validate your XML before sending:
+
+```python
+import xml.etree.ElementTree as ET
+
+def validate_xml(xml_string):
+    try:
+        ET.parse(io.StringIO(xml_string))
+        return True
+    except ET.ParseError as e:
+        print(f"Invalid XML: {e}")
+        return False
+```
+
+## Getting Help
+
+If you encounter issues not covered here:
+
+1. Check the [API Reference](/api-reference/overview) for endpoint-specific details
+2. Verify your request format matches the examples in [Code Examples](/examples)
+3. Review the [Authentication Guide](/authentication) for token management
+4. Contact support at [support@theary.ai](mailto:support@theary.ai)
+

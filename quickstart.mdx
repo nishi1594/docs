@@ -51,14 +51,12 @@ curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
-    "engines": ["CE"],
     "record": {
       "xml": "<ScreeningResults><login><account>05022022</account><username>test</username></login><postResults order=\"12345\"><case><case_number>MJ-05003-TR-0006023-2020</case_number><offense_date>20200310</offense_date><jurisdiction_state>PA</jurisdiction_state><chargeinfo><charge>DRIVING WHILE OPERATOR PRIVILEGES SUSPENDED</charge><disposition>GUILTY</disposition></chargeinfo></case></postResults></ScreeningResults>",
       "search_id": "test-123",
       "search_date": "2024-01-15",
       "applicant_state": "CA"
-    },
-    "response_format": "detailed"
+    }
   }'
 ```
 
@@ -68,42 +66,15 @@ curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app
   "search_id": "test-123",
   "correlation_id": "uuid-456",
   "status": "success",
-  "engines_called": ["CE"],
-  "individual_decisions": {
-    "CE": {
-      "decision": "PASS",
-      "confidence": 0.95
-    }
-  },
+  "decision": "PASS",
+  "confidence": 0.95,
   "data": {...},
   "timing": {
-    "xml_transformer_ms": 1234.56,
-    "compliance_ms": 567.89,
     "total_ms": 1802.45
   }
 }
 ```
 
-## Step 4: Use Multiple Engines
-
-Try evaluating with multiple engines for comparison:
-
-```bash
-curl -X POST https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/evaluate \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "engines": ["SLM", "CE", "T5"],
-    "record": {
-      "xml": "<ScreeningResults>...</ScreeningResults>",
-      "search_id": "test-456",
-      "search_date": "2024-01-15"
-    },
-    "response_format": "short"
-  }'
-```
-
-This will return a comparison view showing decisions from all three engines.
 
 ## Next Steps
 

@@ -5,7 +5,7 @@ description: 'AI-powered criminal record evaluation service'
 
 # Public Records API
 
-The Public Records API orchestrates criminal record evaluation through multiple AI-powered decision engines, providing comprehensive compliance assessments and risk analysis.
+The Public Records API provides comprehensive criminal record evaluation for background screening, including identity matching, compliance assessment, and regulatory analysis.
 
 ## Base URL
 
@@ -20,7 +20,6 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "engines": ["SLM", "CE", "T5"],
     "record": {
       "xml": "<ScreeningResults>...</ScreeningResults>",
       "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
@@ -33,8 +32,7 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
         "source_type": "court_records",
         "verification_status": "verified"
       }
-    },
-    "response_format": "short"
+    }
   }'
 ```
 
@@ -67,12 +65,6 @@ Authorization: Bearer YOUR_JWT_TOKEN
 
 Learn more about [authentication](/authentication).
 
-## Response Formats
-
-The API supports two response formats:
-
-- **short** - Comparison format showing decisions from multiple engines side-by-side
-- **detailed** - Full engine responses with complete evaluation details
 
 ## Getting Started
 
@@ -121,7 +113,7 @@ See [Batch Evaluate Endpoint](/api-reference/endpoints/evaluate-batch) for detai
 The API uses standard HTTP status codes:
 
 - `200` - Success
-- `206` - Partial success (some engines failed)
+- `206` - Partial success
 - `400` - Bad Request
 - `401` - Unauthorized
 - `422` - Validation Error

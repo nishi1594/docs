@@ -1,11 +1,11 @@
 ---
 title: 'Evaluate'
-description: 'Evaluate a single criminal record through multiple AI engines'
+description: 'Evaluate a single criminal record'
 ---
 
 # Evaluate Endpoint
 
-Evaluate a single criminal record through one or more evaluation engines (Compliance Engine, SLM Engine, T5 Model API).
+Evaluate a single criminal record for background screening compliance and reportability.
 
 <Endpoint method="POST" url="/evaluate" />
 
@@ -17,20 +17,8 @@ Evaluate a single criminal record through one or more evaluation engines (Compli
 
 ## Request Body
 
-<ParamField body="body" name="engines" type="array" required>
-  List of evaluation engines to call. Available values: `"CE"`, `"SLM"`, `"T5"`. Can use one or multiple engines. <br />
-  **Example:** `["SLM", "CE", "T5"]`
-</ParamField>
-
 <ParamField body="body" name="record" type="object" required>
   Criminal record data. See [CriminalRecord Schema](/api-reference/schemas/criminal-record) for complete structure.
-</ParamField>
-
-<ParamField body="body" name="response_format" type="string">
-  Response format: `"short"` (comparison format) or `"detailed"` (full engine responses). <br />
-  - Defaults to `"short"` when multiple engines are used <br />
-  - Defaults to `"detailed"` when single engine is used <br />
-  **Example:** `"short"`
 </ParamField>
 
 ## Request Example
@@ -40,7 +28,6 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "engines": ["SLM", "CE", "T5"],
     "record": {
       "xml": "<ScreeningResults><login><account>05022022</account><username>test</username></login><postResults order=\"12345\"><case><case_number>MJ-05003-TR-0006023-2020</case_number><offense_date>20200310</offense_date><jurisdiction_state>PA</jurisdiction_state><chargeinfo><charge>DRIVING WHILE OPERATOR PRIVILEGES SUSPENDED</charge><disposition>GUILTY</disposition></chargeinfo></case></postResults></ScreeningResults>",
       "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
@@ -57,8 +44,7 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
         "industry_sector": "healthcare"
       },
       "offense_ids": ["4628347", "234868", "34756"]
-    },
-    "response_format": "short"
+    }
   }'
 ```
 
@@ -78,16 +64,16 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
   Overall status: `"success"`, `"partial"`, or `"failed"`
 </ResponseField>
 
-<ResponseField name="engines_called" type="array">
-  List of engines that were called
+<ResponseField name="decision" type="string">
+  Final evaluation decision (e.g., "PASS", "FAIL", "REVIEW_REQUIRED")
 </ResponseField>
 
-<ResponseField name="individual_decisions" type="object">
-  Decisions from each engine (keyed by engine name)
+<ResponseField name="confidence" type="number">
+  Confidence score for the decision (0-1)
 </ResponseField>
 
 <ResponseField name="comparison" type="object">
-  Comparison metrics when multiple engines are used
+  Comparison metrics and analysis
 </ResponseField>
 
 <ResponseField name="offense_level_comparison" type="array">
@@ -103,7 +89,7 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
 </ResponseField>
 
 <ResponseField name="data" type="object">
-  Main evaluation data (format depends on response_format)
+  Main evaluation data including case details, offenses, and compliance analysis
 </ResponseField>
 
 <ResponseField name="timing" type="object">
@@ -115,25 +101,11 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
   "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
   "correlation_id": "uuid-456",
   "status": "success",
-  "engines_called": ["SLM", "CE", "T5"],
-  "individual_decisions": {
-    "CE": {
-      "decision": "PASS",
-      "confidence": 0.95
-    },
-    "SLM": {
-      "decision": "PASS",
-      "confidence": 0.92
-    },
-    "T5": {
-      "decision": "PASS",
-      "confidence": 0.88
-    }
-  },
+  "decision": "PASS",
+  "confidence": 0.95,
   "comparison": {
     "agreement": true,
-    "final_decision": "PASS",
-    "winning_engine": "CE"
+    "final_decision": "PASS"
   },
   "offense_level_comparison": [],
   "errors": [],
@@ -144,10 +116,6 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
     "summary": {...}
   },
   "timing": {
-    "xml_transformer_ms": 1234.56,
-    "compliance_ms": 567.89,
-    "slm_engine_ms": 234.12,
-    "t5_engine_ms": 189.45,
     "total_ms": 2036.57
   }
 }
@@ -161,13 +129,9 @@ When some engines fail but others succeed:
 {
   "search_id": "76190bc0-e58c-494f-92c5-0c9a47389528",
   "status": "partial",
-  "engines_called": ["SLM", "CE", "T5"],
-  "individual_decisions": {
-    "CE": {...},
-    "SLM": {...}
-  },
+  "decision": "REVIEW_REQUIRED",
   "errors": [
-    "T5 Engine failed: HTTP 500: Internal server error"
+    "Evaluation partially completed"
   ],
   ...
 }
@@ -175,8 +139,8 @@ When some engines fail but others succeed:
 
 ## Status Codes
 
-- `200` - Success (all engines completed)
-- `206` - Partial success (some engines failed)
+- `200` - Success
+- `206` - Partial success
 - `401` - Authentication required or token expired
 - `422` - Validation error
 - `500` - Server error
