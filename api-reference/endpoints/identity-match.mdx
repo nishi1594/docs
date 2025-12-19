@@ -5,33 +5,19 @@ description: 'Compare two identity records to determine if they match'
 
 # Identity Match Endpoint
 
-Compare candidate information against a criminal record subject to determine identity match probability. This endpoint uses advanced fuzzy matching algorithms to evaluate name, date of birth, SSN, and address similarities.
+Compare candidate information against a criminal record subject to determine identity match probability. This endpoint uses advanced fuzzy matching algorithms including Fellegi-Sunter probabilistic framework, Jaro-Winkler, Soundex, Levenshtein distance, and keyboard distance to evaluate name, date of birth, SSN, and address similarities.
 
 <Endpoint method="POST" url="/complianceEngine/identity-match" />
 
 ## Base URL
 
-The Identity Match endpoint is part of the Compliance Engine service:
-
 ```
 https://compliance-engine-cr-dev-859798439223.us-south1.run.app
 ```
 
-## Interactive Documentation
-
-Visit the Compliance Engine Swagger UI for interactive API testing:
-
-**https://compliance-engine-cr-dev-859798439223.us-south1.run.app/swagger/index.html**
-
-The Swagger UI provides:
-- Interactive endpoint testing
-- Request/response examples
-- Schema definitions
-- Try-it-out functionality
-
 ## Authentication
 
-No authentication required (internal service endpoint).
+No authentication required for this endpoint.
 
 ## Request Body
 
@@ -146,14 +132,21 @@ curl -X POST "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/co
 
 ## Match Scoring
 
-The identity match algorithm uses weighted scoring across multiple components:
+The identity match algorithm uses a weighted scoring system based on the Fellegi-Sunter probabilistic framework:
 
 - **SSN Score** (Weight: 35%) - Exact match when SSN is available
 - **DOB Score** (Weight: 30%) - Date of birth comparison
-- **Name/Alias Score** (Weight: 25%) - Fuzzy name matching including aliases
-- **Address Score** (Weight: 10%) - Address history matching
+- **Name/Alias Score** (Weight: 25%) - Advanced fuzzy name matching including:
+  - Exact matches
+  - Fuzzy matches using Jaro-Winkler similarity
+  - Soundex phonetic matching
+  - Levenshtein distance
+  - Keyboard distance
+  - Substring matching
+  - Alias database matching
+- **Address Score** (Weight: 10%) - Address history matching with USPS standardization
 
-The overall `matchScore` is calculated as a weighted average of these components.
+The overall `matchScore` is calculated as a weighted average of these components. The system includes edge case confidence adjustment and mandatory manual review triggers for low-confidence matches.
 
 ## Status Codes
 
@@ -191,5 +184,5 @@ The overall `matchScore` is calculated as a weighted average of these components
 ## Related Documentation
 
 - [IdentityMatchInput Schema](/api-reference/schemas/identity-match-input) - Complete input structure
-- [Compliance Engine API](/api-reference/endpoints/compliance-evaluate) - Main compliance evaluation endpoint
+- [Evaluate Endpoint](/api-reference/endpoints/evaluate) - Main criminal record evaluation endpoint
 

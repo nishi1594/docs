@@ -46,15 +46,16 @@ curl -X POST "https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.ap
 | Authentication| Exchange API key for JWT token            | `POST /auth/token`                                |
 | Evaluate      | Evaluate a single criminal record         | `POST /evaluate`                                  |
 | Batch Evaluate| Process multiple records in batch         | `POST /evaluate-batch`                            |
-| Identity Match| Compare candidate against record subject | `POST /complianceEngine/identity-match`           |
+| Identity Match| Compare candidate identity against record subject | `POST /complianceEngine/identity-match`           |
 
-## Evaluation Engines
+## Key Features
 
-The API supports multiple evaluation engines that can be used individually or in combination:
+The Public Records API provides comprehensive background check capabilities:
 
-- **CE (Compliance Engine)** - Rule-based compliance evaluation against regulatory requirements
-- **SLM (Structured Language Model)** - ML-powered decision tree evaluation
-- **T5 Model API** - Transformer-based evaluation for additional insights
+- **Identity Matching** - Advanced fuzzy matching algorithms to verify candidate identity against criminal records
+- **Compliance Evaluation** - Automated evaluation against FCRA and state-specific regulations
+- **Multi-Engine Analysis** - Combines rule-based and AI-powered evaluation for comprehensive assessments
+- **Regulatory Compliance** - Built-in support for federal and state reporting restrictions, clean slate laws, and industry-specific requirements
 
 ## Authentication
 
@@ -95,7 +96,17 @@ POST /evaluate
 
 See [Evaluate Endpoint](/api-reference/endpoints/evaluate) for full documentation.
 
-### 3. Batch Processing
+### 3. Identity Matching
+
+Compare candidate information against criminal record subjects:
+
+```bash
+POST /complianceEngine/identity-match
+```
+
+See [Identity Match Endpoint](/api-reference/endpoints/identity-match) for details.
+
+### 4. Batch Processing
 
 Process multiple records efficiently:
 
@@ -118,22 +129,9 @@ The API uses standard HTTP status codes:
 
 ## Interactive API Documentation
 
-### Public Records API (Eval Framework)
-
-Visit our interactive Swagger UI documentation:
+Visit our interactive Swagger UI documentation to test endpoints and explore request/response schemas:
 
 **https://awp-ai-eval-framework-cr-dev-859798439223.us-south1.run.app/docs**
-
-### Compliance Engine API
-
-For identity matching and compliance evaluation endpoints:
-
-**https://compliance-engine-cr-dev-859798439223.us-south1.run.app/swagger/index.html**
-
-The Compliance Engine Swagger UI provides interactive testing for:
-- Identity matching (`POST /complianceEngine/identity-match`)
-- Compliance evaluation (`POST /complianceEngine/evaluate`)
-- Batch evaluation (`POST /complianceEngine/evaluate-batch`)
 
 ## Next Steps
 
