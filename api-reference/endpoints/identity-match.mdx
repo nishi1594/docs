@@ -202,6 +202,150 @@ The overall `matchScore` is calculated as a weighted average of these components
 }
 ```
 
+## Test Endpoints
+
+To make testing easier, we provide test endpoints that return predefined test cases. Use these to get sample data, then test with the identity-match endpoint.
+
+### Available Test Endpoints
+
+All test endpoints are available at the Compliance Engine API base URL:
+
+**Base URL:** `https://compliance-engine-cr-dev-859798439223.us-south1.run.app`
+
+<Tabs>
+  <Tab title="Exact Match">
+    **Endpoint:** `GET /complianceEngine/test/exact-match`
+    
+    Returns a test case with perfectly matching identities (same name, DOB, SSN, address).
+    
+    **Use Case:** Test high-confidence match scenario.
+    
+    ```bash
+    curl "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/complianceEngine/test/exact-match"
+    ```
+  </Tab>
+  
+  <Tab title="Fuzzy Name Match">
+    **Endpoint:** `GET /complianceEngine/test/fuzzy-name-match`
+    
+    Returns a test case with name variations (middle name, aliases).
+    
+    **Use Case:** Test fuzzy name matching and alias handling.
+    
+    ```bash
+    curl "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/complianceEngine/test/fuzzy-name-match"
+    ```
+  </Tab>
+  
+  <Tab title="No Match">
+    **Endpoint:** `GET /complianceEngine/test/no-match`
+    
+    Returns a test case with completely different people (different names, DOB, but same address).
+    
+    **Use Case:** Test that the system correctly identifies non-matches.
+    
+    ```bash
+    curl "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/complianceEngine/test/no-match"
+    ```
+  </Tab>
+  
+  <Tab title="Partial Match">
+    **Endpoint:** `GET /complianceEngine/test/partial-match`
+    
+    Returns a test case with partial matching (similar names with aliases, same DOB and address).
+    
+    **Use Case:** Test partial match scenarios and alias matching.
+    
+    ```bash
+    curl "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/complianceEngine/test/partial-match"
+    ```
+  </Tab>
+  
+  <Tab title="Typo Match">
+    **Endpoint:** `GET /complianceEngine/test/typo-match`
+    
+    Returns a test case with name typos (keyboard distance detection).
+    
+    **Use Case:** Test typo detection and keyboard distance algorithm.
+    
+    ```bash
+    curl "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/complianceEngine/test/typo-match"
+    ```
+  </Tab>
+  
+  <Tab title="All Test Cases">
+    **Endpoint:** `GET /complianceEngine/test/all`
+    
+    Returns all test cases in a dictionary format.
+    
+    **Use Case:** Get all test scenarios at once.
+    
+    ```bash
+    curl "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/complianceEngine/test/all"
+    ```
+  </Tab>
+</Tabs>
+
+### How to Use Test Endpoints
+
+1. **Get a test case:**
+   ```bash
+   curl "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/complianceEngine/test/exact-match"
+   ```
+
+2. **Use the response in identity-match:**
+   ```bash
+   curl -X POST "https://compliance-engine-cr-dev-859798439223.us-south1.run.app/complianceEngine/identity-match" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "candidateToVerify": { ... },
+       "candidateInRecord": { ... }
+     }'
+   ```
+
+### Expected Results by Test Case
+
+<Accordion title="Exact Match">
+- **matchScore:** ~0.9-1.0
+- **isMatch:** `true`
+- All component scores should be high
+</Accordion>
+
+<Accordion title="Fuzzy Name Match">
+- **matchScore:** ~0.7-0.9
+- **isMatch:** `true` or `false` (depending on threshold)
+- Name score should reflect fuzzy matching
+</Accordion>
+
+<Accordion title="No Match">
+- **matchScore:** <0.3
+- **isMatch:** `false`
+- Name and DOB scores should be low
+</Accordion>
+
+<Accordion title="Partial Match">
+- **matchScore:** ~0.4-0.7
+- **isMatch:** `false` (likely)
+- Address and DOB may match, but name variations
+</Accordion>
+
+<Accordion title="Typo Match">
+- **matchScore:** ~0.6-0.8
+- **isMatch:** `true` or `false`
+- Name score should handle typo gracefully
+</Accordion>
+
+### Testing in Swagger UI
+
+1. Open Swagger UI: `https://compliance-engine-cr-dev-859798439223.us-south1.run.app/swagger`
+2. Navigate to **Test Endpoints** section
+3. Select a test endpoint (e.g., `GET /complianceEngine/test/exact-match`)
+4. Click "Try it out" → "Execute"
+5. Copy the response JSON
+6. Navigate to `POST /complianceEngine/identity-match` in **Compliance Engine** section
+7. Paste the test case JSON into the request body
+8. Execute to see match results
+
 ## Related Documentation
 
 - [IdentityMatchInput Schema](/api-reference/schemas/identity-match-input) - Complete input structure
